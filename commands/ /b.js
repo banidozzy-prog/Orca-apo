@@ -1,32 +1,24 @@
-const User = require('../models/User');
+const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
+const config = require('../config.json');
 
 module.exports = {
     name: 'b',
     async execute(message) {
-        // Verifica se quem digitou é Administrador
-        if (!message.member.permissions.has("ADMINISTRATOR")) {
-            return message.reply("❌ Apenas membros da administração podem usar este comando.");
-        }
+        const cargosSs = [config.cargo_ss_mob, config.cargo_ss_emu]; // Ajuste conforme seu JSON
+        if (!message.member.roles.cache.some(r => cargosSs.includes(r.id))) return;
 
-        // Pega o usuário mencionado (ex: !b @usuario)
-        const target = message.mentions.users.first();
-        if (!target) {
-            return message.reply("❌ Você precisa mencionar um usuário! Exemplo: `!b @usuario`");
-        }
+        await message.delete().catch(() => {});
 
-        try {
-            // Procura o usuário no banco ou cria um se ele não existir
-            // e marca isBlacklisted como true
-            await User.findOneAndUpdate(
-                { userId: target.id },
-                { $set: { isBlacklisted: true } },
-                { upsert: true, new: true }
-            );
-            
-            message.reply(`✅ O usuário **${target.username}** foi adicionado à blacklist com sucesso.`);
-        } catch (error) {
-            console.error(error);
-            message.reply("❌ Erro ao tentar adicionar este usuário à blacklist.");
-        }
+        const modal = new ModalBuilder()
+            .setCustomId('modal_blacklist_add')
+            .setTitle('Adicionar à Blacklist');
+
+        modal.addComponents(
+            new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('id_alvo').setLabel('ID do Jogador').setStyle(TextInputStyle.Short).setRequired(true)),
+            new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('motivo_alvo').setLabel('Motivo').setStyle(TextInputStyle.Paragraph).setRequired(true)),
+            new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('foto_alvo').setLabel('Link da Prova (SS)').setStyle(TextInputStyle.Short).setRequired(true))
+        );
+
+        await message.member.interaction.showModal(modal);
     }
 };
