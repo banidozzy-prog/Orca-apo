@@ -1,20 +1,21 @@
-require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
+    intents: [
+        GatewayIntentBits.Guilds, 
+        GatewayIntentBits.GuildMessages, 
+        GatewayIntentBits.MessageContent
+    ]
 });
 
-// COLOQUE O SEU LINK DO MONGODB AQUI ENTRE AS ASPAS:
-const MONGO_URI = "mongodb+srv://SEU_USUARIO:SUA_SENHA@cluster.mongodb.net/SEU_BANCO"; 
+// A string de conexão fixa (substitua pelo seu link real)
+const mongoURI = "COLE_AQUI_O_SEU_LINK_DO_MONGODB_COMPLETO";
 
-mongoose.connect(MONGO_URI)
-    .then(() => console.log("✅ Banco de dados conectado com sucesso!"))
-    .catch(err => {
-        console.error("❌ ERRO AO CONECTAR NO BANCO:");
-        console.error(err);
-    });
+mongoose.connect(mongoURI)
+    .then(() => console.log("✅ Banco de dados conectado!"))
+    .catch(err => console.error("❌ Erro na conexão ao banco:", err));
 
 client.on('ready', () => {
     console.log(`🚀 ORCA APOSTAS online como ${client.user.tag}`);
@@ -30,6 +31,6 @@ client.on('messageCreate', (message) => {
     }
 });
 
-// O TOKEN AINDA PODE FICAR NO PAINEL DO SHARD CLOUD
+// O TOKEN pode continuar no painel, mas se der erro aqui também, 
+// troque process.env.TOKEN pelo seu token real entre aspas.
 client.login(process.env.TOKEN);
-
