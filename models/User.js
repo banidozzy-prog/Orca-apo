@@ -1,25 +1,13 @@
-const User = require('../models/User');
+const mongoose = require('mongoose');
 
-module.exports = {
-    name: 'b',
-    async execute(message) {
-        // Verifica se quem digitou é admin (opcional, ou você pode remover esta linha)
-        if (!message.member.permissions.has("ADMINISTRATOR")) return message.reply("Apenas ADMs podem usar este comando.");
+const userSchema = new mongoose.Schema({
+    userId: { type: String, required: true, unique: true },
+    wins: { type: Number, default: 0 },
+    losses: { type: Number, default: 0 },
+    streak: { type: Number, default: 0 },
+    coins: { type: Number, default: 0 },
+    contadorCoins: { type: Number, default: 0 },
+    isBlacklisted: { type: Boolean, default: false } // <--- ISSO É O QUE PERMITE O !b FUNCIONAR
+});
 
-        const target = message.mentions.users.first();
-        if (!target) return message.reply("Marque o usuário que deseja adicionar à blacklist.");
-
-        try {
-            // Atualiza ou cria o usuário no banco marcando ele como banido
-            await User.findOneAndUpdate(
-                { userId: target.id },
-                { $set: { isBlacklisted: true } },
-                { upsert: true, new: true }
-            );
-            message.reply(`✅ Usuário ${target.tag} foi adicionado à blacklist com sucesso.`);
-        } catch (error) {
-            console.error(error);
-            message.reply("❌ Erro ao adicionar à blacklist.");
-        }
-    }
-};
+module.exports = mongoose.model('User', userSchema);
